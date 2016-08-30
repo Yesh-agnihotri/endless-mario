@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head><title>Mario</title></head>
+<body >
+<canvas id="background" width="800" height="600" style="position: absolute; left: 0; top: 0;z-index:1;"></canvas>
+<canvas id="mario" width="800" height="600" style="border:1px solid #d3d3d3;position: absolute; left: 0; top: 0;z-index:2" ></canvas>
+<canvas id="turt" width="800" height="600" style="border:1px solid #d3d3d3;position: absolute; left: 0; top: 0;z-index:2" ></canvas>
+<canvas id="message" width="800" height="600" style="border:1px solid #d3d3d3;position: absolute; left: 0; top: 0;z-index:2" ></canvas>
+<canvas id="pipe" width="800" height="600" style="border:1px solid #d3d3d3;position: absolute; left: 0; top: 0;z-index:2" ></canvas>
+<canvas id="gun" width="800" height="600" style="border:1px solid #d3d3d3;position: absolute; left: 0; top: 0;z-index:2" ></canvas>
+<script>
+var music = new Audio('music.mp3');
+var music_over = new Audio('gameover.mp3');
+var sound_jump = new Audio('jump.wav');
+music.play();
+var canvas = document.getElementById('mario');
+var ctx = canvas.getContext('2d');
+var canvas_back = document.getElementById('background');
+var ctx2 = canvas_back.getContext('2d');
+var canvas_back2 = document.getElementById('turt');
+var ctx3 = canvas_back2.getContext('2d');
+var canvas_back3 = document.getElementById('message');
+var ctxmessage = canvas_back3.getContext('2d');
+var canvas_back4 = document.getElementById('pipe');
+var ctxpipe= canvas_back4.getContext('2d');
+var canvas_back5 = document.getElementById('gun');
+var ctxgun= canvas_back5.getContext('2d');
+var x=0;
+var y=0;
+var jump=false;
+var stop=false;
+var firstjump=true;
+var t;
+var intpipe;
+var score=0;
+var n;
+// Create an image element
+var back=document.createElement('IMG');
+var img = document.createElement('IMG');
+var tur=document.createElement('IMG');
+var pip=document.createElement('IMG');
+var bullet=document.createElement('IMG');
+function collide_turt(){
+if(turt.posx<=marios.posx+marios.sizex&&turt.posx>=marios.posx&&turt.posy>=marios.posy&&turt.posy<=marios.posy+marios.sizey)
+{
+clearInterval(s);
+clearInterval(t);
+clearInterval(n);
+clearInterval(intpipe);
+stop=true;
+displayscore();
+music.pause();
+music_over.play();
+}
+}
+function collide_pipe(){
+if(pipe1.posx<=marios.posx+marios.sizex&&pipe1.posx>=marios.posx&&pipe1.posy>=marios.posy&&pipe1.posy<=marios.posy+marios.sizey)
+{
+clearInterval(s);
+clearInterval(t);
+clearInterval(n);
+clearInterval(intpipe);
+stop=true;
+displayscore();
+music.pause();
+music_over.play();
+}
+}
+function displayscore()
+{
+ctxmessage.clearRect(0,0,canvas.width,canvas.height);
+ctxmessage.font = "30px Arial";
+ctxmessage.fillText("Your score:"+score,10,50);
+if(stop){
+ctxmessage.font = "100px Arial";
+ctxmessage.fillText("GAME OVER",100,280);
+}
+}
+marios={
+posx:100,
+posy:412,
+sizex:60,
+sizey:100};
+turt={
+posx:850,
+posy:432,
+sizex:60,
+sizey:80,
+speed:5};
+pipe1=
+	{
+	posx:1250,
+	posy:432,
+	sizex:60,
+	sizey:80,
+	speed:5
+	};
+gun={
+	posx:1250,
+	posy:432,
+	sizex:60,
+	sizey:80,
+	speed:3
+	
+	}
+// When the image is loaded, draw it
+back.onload=function(){
+ctx2.drawImage(back, 0, 0,canvas.width, canvas.height);
+}
+back.src="back.png";
+img.onload=function(){
+ctx.drawImage(img, marios.posx,marios.posy,marios.sizex,marios.sizey);
+}
+img.src = "mario.png";
+tur.onload=function()
+{
+ctx3.drawImage(tur,turt.posx,turt.posy,turt.sizex,turt.sizey);
+}
+tur.src = "turtle.png";
+pip.onload=function()
+{
+ctxpipe.drawImage(pip,pipe1.posx,pipe1.posy,pipe1.sizex,pipe1.sizey);
+}
+pip.src="pipe.png";
+function backdrawer(n,x){
+for (i = 0; i < n; i++) 
+{ 
+ctx2.drawImage(back, canvas.width*i-x, 0,canvas.width, canvas.height);
+}
+}
+function clrmario(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+function clrturt(){
+ctx3.clearRect(0,0,canvas.width,canvas.height);
+}
+function clrpipe(){
+ctxpipe.clearRect(0,0,canvas.width,canvas.height);
+}
+function clrgun(){
+ctxgun.clearRect(0,0,canvas.width,canvas.height);
+}
+function mariodrawer(){
+	clrmario();
+    ctx.drawImage(img,marios.posx,marios.posy,marios.sizex,marios.sizey);
+}
+function renderturt(){
+
+if(!stop)
+{
+
+clrturt();
+ctx3.drawImage(tur,turt.posx,turt.posy,turt.sizex,turt.sizey);
+if(check==1)
+mariogun();
+}
+
+}
+function renderpipe(){
+
+if(!stop)
+{
+clrpipe();
+ctxpipe.drawImage(pip,pipe1.posx,pipe1.posy,pipe1.sizex,pipe1.sizey);
+}
+}
+var check=0;
+document.onkeydown=checkKey;
+document.onkeypress=fire;
+function checkKey(e) {
+    e = window.event;
+    if (e.keyCode == '32') {
+        if(stop){
+		jumping = false;
+		}
+		else{ 
+		sound_jump.play();
+		jumper(); 
+		if(stop){
+		jumping = false;
+		}
+		}
+    }
+   }
+   function fire(evt)
+   {
+   evt = window.event;
+   if(evt.keyCode=='13')
+   {
+   check=1;
+   }
+   }
+   function backanimate(){
+	x=x+5;	
+	backdrawer(400,x);	 
+}
+var s=setInterval(backanimate,1000/60);
+var speedcounter=0;
+
+function turtanimate()
+{
+collide_turt();
+   turt.posx=turt.posx-turt.speed;
+   renderturt();
+ if(stop==true){
+ clearInterval(t);
+ }
+ else if(stop==false && turt.posx<=-50)
+{
+score++;
+displayscore();
+clearInterval(t);
+if(score%3==0)
+speedcounter=speedcounter+3;
+turt.speed=5+speedcounter;
+turt.posx=pipe1.posx+200+1000*Math.random();
+}
+}
+function pipeanimate()
+{
+   collide_pipe();
+   pipe1.posx=pipe1.posx-turt.speed;
+ if(stop==true){
+ //clearInterval(t);
+ }
+  else if(stop==false && pipe1.posx<=-50)
+{
+score++;
+displayscore();
+clearInterval(intpipe);
+pipe1.speed=10+5*Math.random();
+pipe1.posx=turt.posx+200+1000*Math.random();
+}
+renderpipe();
+}
+function newturt(){
+var t=setInterval(turtanimate,1000/60);
+if(stop==true)
+{
+clearInterval(t);
+}
+}
+function newpipe()
+{
+var intpipe=setInterval(pipeanimate,1000/60);
+if(stop==true)
+clearInterval(intpipe);
+}
+var nturt=setInterval(newturt(),500);
+var npipe=setInterval(newpipe(),500);
+var yVel = 0;
+var gravity = 2;
+function jumper() {
+    if (jump == false) {
+        yVel = -30;
+        jump = true;
+		var marjump=setInterval(mario_jump,1000/45);
+		if (firstjump==false)
+			{
+			clearInterval(marjump);
+			}
+		else{
+		firstjump=false;
+		}
+    }
+}
+ 
+function mario_jump(){
+ if (jump) {
+     yVel += gravity;
+		marios.posy+= yVel;
+         if (marios.posy >412 ) {
+             marios.posy = 412;
+             yVel = 0;
+             jump = false;
+			 
+            }
+	
+	mariodrawer();
+     }
+}
+var bullet_pos=0;
+ function mariogun()
+ {
+ clrgun();
+ ctx.clearRect(marios.posx+80+bullet_pos,442,20,10);
+ bullet_pos++;
+ ctxgun.drawImage(bullet,marios.posx+80+bullet_pos,442,30,20);
+ if((bullet,marios.posx+130+bullet_pos)>=pipe1.posx)
+ {
+ ctxgun.clearRect(marios.posx+130+bullet_pos,442,30,20);
+ clrgun()
+ bullet_pos=0;
+ check=0;
+ }
+ if((bullet,marios.posx+130+bullet_pos)>=turt.posx)
+ {
+ clrgun();
+ clrturt();
+ score++;
+ displayscore();
+ turt.posx=pipe1.posx+200+1000*Math.random();
+ bullet_pos=0;
+ check=0;
+ctxgun.clearRect(marios.posx+130+bullet_pos,442,30,20);
+}
+}
+bullet.src="bul.png";
+</script>
+</body>
+</html>
